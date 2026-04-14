@@ -32,6 +32,24 @@ jobs:
           }
         continue-on-error: true
 
+      - name: patch vcxproj for stub build (no ADLX SDK on runner)
+        shell: pwsh
+        run: |
+          $p = "AMDUVGuard/AMDUVGuard.vcxproj"
+          $x = Get-Content $p -Raw
+          $x = $x -replace 'UVG_HAVE_ADLX;', ''
+          $x = $x -replace ';\$\(SolutionDir\)\.\.\\ADLX_SDK\\SDK', ''
+          $x = $x -replace '\s*<ClCompile Include="\$\(SolutionDir\)\.\.\\ADLX_SDK\\SDK\\ADLXHelper\\Windows\\Cpp\\ADLXHelper\.cpp"\s*/>', ''
+          $x = $x -replace '\s*<ClCompile Include="\$\(SolutionDir\)\.\.\\ADLX_SDK\\SDK\\Platform\\Windows\\WinAPIs\.cpp"\s*/>', ''
+          Set-Content -Path $p -Value $x -NoNewline
+          Write-Host "patched $p for stub build"
+          if (Select-String -Path $p -Pattern 'UVG_HAVE_ADLX|ADLX_SDK' -Quiet) {
+            Write-Host "::warning::residual ADLX references remain after patch"
+            Select-String -Path $p -Pattern 'UVG_HAVE_ADLX|ADLX_SDK'
+          } else {
+            Write-Host "no residual ADLX references"
+          }
+
       - name: build (Release|x64, UVG_HAVE_ADLX off)
         shell: pwsh
         run: |
