@@ -51,6 +51,10 @@ add `UVG_HAVE_ADLX` (Release|x64). Without this define the project still
 builds and runs as a stub that reports "ADLX not available" — useful for
 UI work on a non-AMD machine.
 
+> The GitHub Actions workflow in `.github/workflows/build.yml` builds the
+> stub configuration (no `UVG_HAVE_ADLX`), so CI does not require the
+> proprietary ADLX SDK to be present on the runner.
+
 You also need to add the ADLX helper sources to the build. The official
 SDK ships them under `SDK\ADLXHelper\Windows\Cpp\`. Add
 `ADLXHelper.cpp` to the project (right-click project → Add → Existing item).
