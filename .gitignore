@@ -1,0 +1,24 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.aps
+*.pdb
+*.ilk
+*.idb
+*.exp
+*.lib
+*.log
+*.tlog
+*.opendb
+*.db
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.VC.opendb
+
+# Local config
+config.json
+amduvguard.log*

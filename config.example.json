@@ -1,0 +1,16 @@
+{
+  "targetMinFreqMHz": 500,
+  "targetMaxFreqMHz": 2400,
+  "targetVoltageMv": 1050,
+  "allowedMinFreqDeviationMHz": 25,
+  "allowedMaxFreqDeviationMHz": 25,
+  "allowedVoltageDeviationMv": 10,
+  "slippedPercentThreshold": 98,
+  "startupDelaySeconds": 90,
+  "pollIntervalSeconds": 10,
+  "autoReapplyEnabled": true,
+  "fullscreenAlertEnabled": true,
+  "startWithWindows": false,
+  "minimizeToTray": true,
+  "logLevel": 2
+}
