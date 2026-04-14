@@ -1,0 +1,96 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  msvc-release:
+    name: msvc / release x64 (stub)
+    runs-on: windows-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup msbuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: setup nuget
+        uses: NuGet/setup-nuget@v2
+        continue-on-error: true
+
+      - name: restore packages
+        shell: pwsh
+        run: |
+          if (Test-Path packages.config) {
+            nuget restore AMDUVGuard.sln
+          } else {
+            Write-Host "no packages.config, skipping nuget restore"
+          }
+        continue-on-error: true
+
+      - name: build (Release|x64, UVG_HAVE_ADLX off)
+        shell: pwsh
+        run: |
+          msbuild AMDUVGuard.sln `
+            /nologo `
+            /m `
+            /p:Configuration=Release `
+            /p:Platform=x64 `
+            /p:WarningLevel=2
+
+      - name: locate artifact
+        id: locate
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Recurse -Filter AMDUVGuard.exe `
+            | Where-Object { $_.FullName -match 'Release' } `
+            | Select-Object -First 1
+          if ($null -eq $exe) {
+            Write-Host "::warning::AMDUVGuard.exe not found after build"
+            exit 0
+          }
+          $size = [math]::Round($exe.Length / 1KB, 1)
+          Write-Host "found: $($exe.FullName) ($size KB)"
+          "exe_path=$($exe.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "exe_size_kb=$size"          | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: stamp build summary
+        shell: pwsh
+        env:
+          BUILD_TAG: ${{ vars.BUILD_TAG }}
+        run: |
+          $sha   = "${{ github.sha }}".Substring(0, 8)
+          $when  = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+          $actor = "${{ github.actor }}"
+          $ref   = "${{ github.ref_name }}"
+          $tag   = $env:BUILD_TAG
+          if ([string]::IsNullOrEmpty($tag)) { $tag = "untagged-dev" }
+
+          Write-Host ""
+          Write-Host "================ AMDUVGuard build summary ================"
+          Write-Host ("  product     : AMDUVGuard")
+          Write-Host ("  version     : 0.3.0")
+          Write-Host ("  config      : Release|x64 (stub, UVG_HAVE_ADLX off)")
+          Write-Host ("  toolset     : v143")
+          Write-Host ("  branch      : {0}" -f $ref)
+          Write-Host ("  commit      : {0}" -f $sha)
+          Write-Host ("  actor       : {0}" -f $actor)
+          Write-Host ("  built (utc) : {0}" -f $when)
+          Write-Host ("  artifact    : ${{ steps.locate.outputs.exe_path }}")
+          Write-Host ("  size        : ${{ steps.locate.outputs.exe_size_kb }} KB")
+          Write-Host ("  build-tag   : {0}" -f $tag)
+          Write-Host "=========================================================="
+          Write-Host ""
+
+      - name: upload artifact
+        if: steps.locate.outputs.exe_path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: AMDUVGuard-x64-stub
+          path: ${{ steps.locate.outputs.exe_path }}
+          if-no-files-found: warn
+        continue-on-error: true
