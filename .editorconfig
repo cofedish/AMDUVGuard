@@ -1,0 +1,33 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{cpp,h,hpp,c,cc,inl,rc,manifest}]
+indent_style = space
+indent_size = 4
+
+[*.{sln,vcxproj,vcxproj.filters,props,targets}]
+indent_style = space
+indent_size = 2
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
+end_of_line = lf
+indent_size = 2
+
+[*.{yml,yaml}]
+end_of_line = lf
+indent_size = 2
+
+[*.{ps1,bat,cmd}]
+indent_size = 4
+
+[*.json]
+end_of_line = lf
+indent_size = 2
